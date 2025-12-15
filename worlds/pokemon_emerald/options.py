@@ -718,6 +718,11 @@ class ModifyRoute118(Toggle):
     """
     display_name = "Modify Route 118"
 
+class RequireFlyForRoute132(Toggle):
+    """
+    Determines whether HM02 Fly is logically required to navigate route 132.
+    """
+    display_name = "Require Fly For Route 132"
 
 class FreeFlyLocation(Toggle):
     """
@@ -920,6 +925,7 @@ class PokemonEmeraldOptions(PerGameCommonOptions):
     extra_boulders: ExtraBoulders
     extra_bumpy_slope: ExtraBumpySlope
     modify_118: ModifyRoute118
+    require_fly_for_132: RequireFlyForRoute132
     free_fly_location: FreeFlyLocation
     free_fly_blacklist: FreeFlyBlacklist
     hm_requirements: HmRequirements

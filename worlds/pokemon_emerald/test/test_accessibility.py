@@ -2,7 +2,7 @@ from Options import Toggle
 
 from . import PokemonEmeraldTestBase
 from ..util import location_name_to_label
-from ..options import NormanRequirement
+from ..options import NormanRequirement, HmRequirements
 
 
 class TestBasic(PokemonEmeraldTestBase):
@@ -95,6 +95,60 @@ class TestModify118(PokemonEmeraldTestBase):
         self.collect_by_name(["HM03 Surf", "Balance Badge", "Acro Bike"])
         self.assertTrue(self.can_reach_location(location_name_to_label("NPC_GIFT_RECEIVED_GOOD_ROD")))
 
+class TestRequireFlyForRoute132Off(PokemonEmeraldTestBase):
+    options = {
+        "require_fly_for_132": Toggle.option_false,
+        "remove_roadblocks": {"Lilycove City Wailmer"}
+    }
+
+    def test_pacifidlog_accessible(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge"])
+        self.assertTrue(self.can_reach_region("REGION_PACIFIDLOG_TOWN/MAIN"))
+
+    def test_accessible_with_only_surf(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge"])
+        self.assertTrue(self.can_reach_region("REGION_ROUTE132/EAST"))
+
+class TestRequireFlyForRoute132On(PokemonEmeraldTestBase):
+    options = {
+        "require_fly_for_132": Toggle.option_true,
+        "remove_roadblocks": {"Lilycove City Wailmer"}
+    }
+
+    def test_pacifidlog_accessible(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge"])
+        self.assertTrue(self.can_reach_region("REGION_PACIFIDLOG_TOWN/MAIN"))
+
+    def test_inaccessible_with_only_surf(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge"])
+        self.assertFalse(self.can_reach_region("REGION_ROUTE132/EAST"))
+
+    def test_inaccessible_with_fly_without_badge(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge", "HM02 Fly"])
+        self.assertFalse(self.can_reach_region("REGION_ROUTE132/EAST"))
+
+    def test_accessible_with_fly_and_badge(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge", "HM02 Fly", "Feather Badge"])
+        self.assertTrue(self.can_reach_region("REGION_ROUTE132/EAST"))
+
+class TestRequireFlyForRoute132OnWithFreeFly(PokemonEmeraldTestBase):
+    options = {
+        "require_fly_for_132": Toggle.option_true,
+        "remove_roadblocks": {"Lilycove City Wailmer"},
+        "hm_requirements": HmRequirements.option_fly_without_badge
+    }
+
+    def test_pacifidlog_accessible(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge"])
+        self.assertTrue(self.can_reach_region("REGION_PACIFIDLOG_TOWN/MAIN"))
+
+    def test_inaccessible_with_only_surf(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge"])
+        self.assertFalse(self.can_reach_region("REGION_ROUTE132/EAST"))
+
+    def test_accessible_with_fly_without_badge(self) -> None:
+        self.collect_by_name(["HM03 Surf", "Balance Badge", "HM02 Fly"])
+        self.assertTrue(self.can_reach_region("REGION_ROUTE132/EAST"))
 
 class TestFreeFly(PokemonEmeraldTestBase):
     options = {

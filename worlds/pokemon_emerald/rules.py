@@ -8,7 +8,7 @@ from worlds.generic.Rules import add_rule, set_rule
 
 from .data import LocationCategory, NATIONAL_ID_TO_SPECIES_ID, NUM_REAL_SPECIES, data
 from .locations import PokemonEmeraldLocation
-from .options import DarkCavesRequireFlash, EliteFourRequirement, NormanRequirement, Goal
+from .options import DarkCavesRequireFlash, EliteFourRequirement, HmRequirements, NormanRequirement, Goal
 
 if TYPE_CHECKING:
     from . import PokemonEmeraldWorld
@@ -31,6 +31,9 @@ def set_rules(world: "PokemonEmeraldWorld") -> None:
 
     def has_mach_bike(state: CollectionState):
         return state.has("Mach Bike", world.player)
+
+    def can_fly(state: CollectionState):
+        return state.has("HM02 Fly", world.player) and (state.has("Feather Badge", world.player) or world.options.hm_requirements == HmRequirements.option_fly_without_badge)
 
     def defeated_n_gym_leaders(state: CollectionState, n: int) -> bool:
         return state.has_from_list_unique([
@@ -1404,10 +1407,17 @@ def set_rules(world: "PokemonEmeraldWorld") -> None:
         get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE131/MAIN"),
         hm_rules["HM03 Surf"]
     )
-    set_rule(
-        get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE132/EAST"),
-        hm_rules["HM03 Surf"]
-    )
+
+    if world.options.require_fly_for_132:
+        set_rule(
+            get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE132/EAST"),
+            hm_rules["HM03 Surf"] and can_fly
+        )
+    else:
+        set_rule(
+            get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE132/EAST"),
+            hm_rules["HM03 Surf"]
+        )
 
     # Sky Pillar
     set_rule(
