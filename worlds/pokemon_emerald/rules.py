@@ -32,9 +32,6 @@ def set_rules(world: "PokemonEmeraldWorld") -> None:
     def has_mach_bike(state: CollectionState):
         return state.has("Mach Bike", world.player)
 
-    def can_fly(state: CollectionState):
-        return state.has("HM02 Fly", world.player) and (state.has("Feather Badge", world.player) or world.options.hm_requirements == HmRequirements.option_fly_without_badge)
-
     def defeated_n_gym_leaders(state: CollectionState, n: int) -> bool:
         return state.has_from_list_unique([
             "EVENT_DEFEAT_ROXANNE",
@@ -1408,15 +1405,20 @@ def set_rules(world: "PokemonEmeraldWorld") -> None:
         hm_rules["HM03 Surf"]
     )
 
-    if world.options.require_fly_for_132:
+    if not world.options.require_fly_for_132:
         set_rule(
             get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE132/EAST"),
-            hm_rules["HM03 Surf"] and can_fly
+            hm_rules["HM03 Surf"]
+        )
+    elif world.options.hm_requirements == HmRequirements.option_fly_without_badge:
+        set_rule(
+            get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE132/EAST"),
+            lambda state: hm_rules["HM03 Surf"] and state.has("HM02 Fly", world.player)
         )
     else:
         set_rule(
             get_entrance("REGION_PACIFIDLOG_TOWN/MAIN -> REGION_ROUTE132/EAST"),
-            hm_rules["HM03 Surf"]
+            lambda state: hm_rules["HM03 Surf"] and state.has("HM02 Fly", world.player) and state.has("Feather Badge", world.player)
         )
 
     # Sky Pillar
